@@ -1,3 +1,7 @@
+/// @function					goodLog([logfile], [writeToFile]);
+/// @description				Create a new logging object
+/// @param {string} [logfile]	The name of the file to log to	
+/// @param {string} [writeToFile]	Default True, can be set to false to disable file output
 function goodLog(output = "log.txt", toFile = true) constructor {
 
 	config				=	{
