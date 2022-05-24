@@ -1,13 +1,18 @@
-/// @function					goodLog([logfile], [writeToFile]);
-/// @description				Create a new logging object
-/// @param {string} [logfile]	The name of the file to log to	
+// goodLog written by Brian LaClair ( https://brianlaclair.com/ )
+// Documentation at: https://github.com/brianlaclair/goodLog
+// Contributions Welcome!
+
+/// @function						goodLog([logfile], [writeToFile]);
+/// @description					Create a new logging object
+/// @param {string} [logfile]		The name of the file to log to
 /// @param {string} [writeToFile]	Default True, can be set to false to disable file output
 function goodLog(output = "log.txt", toFile = true) constructor {
 
 	config				=	{
-								stringSep	: "-",
+								sepChar		: "-",
 								sepLength	: 50,
-								sepChar		: "\n",
+								nlChar		: "\n",
+								logTitle	: undefined,
 								outputFile	: output,
 								toFile		: toFile,
 								inGameLog	: false,
@@ -21,9 +26,16 @@ function goodLog(output = "log.txt", toFile = true) constructor {
 	/// @param {string} output		The value of what to output
 	/// @param {string} [header]	A title to highlight the output with
 	static log			=	function (output, header = undefined) {
-								var trueOut	= "[" + __timeStamp() + "]: " + string(output);
-								var s		= config.sepChar;
-						
+								var s		= config.nlChar;
+								var title	= "";
+								
+								if (!is_undefined(config.logTitle)) {
+									title	= string(config.logTitle) + ": ";
+								}
+								
+								var basicOut	= "[" + __timeStamp() + "] " + title + string(output)
+								var trueOut		= s + basicOut;
+								
 								// if there's a header for the log, this is a special output - treat it as such
 								if (!is_undefined(header)) {
 									var remove	= ceil(string_length(header) / 2);
@@ -31,12 +43,13 @@ function goodLog(output = "log.txt", toFile = true) constructor {
 									var top		= __genSep(len - remove) + string(header) + __genSep(len - remove);
 									var bottom	= __genSep(config.sepLength);
 							
-									trueOut		= s + top + s + trueOut + s + bottom + s; 
+									basicOut	= top + trueOut + s + bottom;
+									trueOut		= s + basicOut; 
 								}
 						
 								// Log out to the array in real-time if enabled
 								if (config.inGameLog) {
-									array_push(logged, trueOut);
+									array_push(logged, basicOut);
 								}
 						
 								// Log out to the file in real-time if enabled
@@ -46,14 +59,18 @@ function goodLog(output = "log.txt", toFile = true) constructor {
 						
 								// Output to GM console if enabled
 								if (!config.silent) {
-									show_debug_message(trueOut);
+									show_debug_message(basicOut);
 								}
 							}
 							
 	// generates a timestamp in the style of "MM/DD/YYYY HH:MM:SS" 	
 	static __timeStamp	=  function() {
-								var dateString = string(current_month) + "/" + string(current_day) + "/" + string(current_year);
-								var timeString = string(current_hour) + ":" + string(current_minute) + ":" + string(current_second);
+								var dateString = string_format(current_month, 2, 0) + "/" + string_format(current_day, 2, 0) + "/" + string_format(current_year, 2, 0);
+								var timeString = string_format(current_hour, 2, 0) + ":" + string_format(current_minute, 2, 0) + ":" + string_format(current_second, 2, 0);
+								
+								// Adds leading 0's to the output string (ie, [ 5/24/2022  8: 1:16] becomes [05/24/2022 08:01:16]
+								dateString	   = string_replace_all(dateString, " ", "0");
+								timeString	   = string_replace_all(timeString, " ", "0");
 						
 								return dateString + " " + timeString;
 						   }	
@@ -75,7 +92,7 @@ function goodLog(output = "log.txt", toFile = true) constructor {
 								}
 						
 								for (var i = 0; i < length; i++) {
-									ret += config.stringSep;
+									ret += config.sepChar;
 								}
 								return ret;
 							}
